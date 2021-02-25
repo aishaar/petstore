@@ -19,13 +19,31 @@ self.addEventListener('install', (e) => {
    );
 });
 
-self.addEventListener('fetch', function (e) {
+/*self.addEventListener('fetch', function (e) {
     e.respondWith(
         //check if the cache has the file
         caches.match(e.request).then(function (r) {
             console.log('[Service Worker] Fetching resources:' + e.request.url );
             //'r' is the matching file if it exists in the cache
             return r
+        })
+    );
+});*/
+
+self.addEventListener('fetch', function (e) {
+    e.respondWith(
+        //check if the cache has the file
+        caches.match(e.request).then(function (r) {
+            //Downloading the file if it is not in the cache
+            return r || fetch(e.request).then(function(response)
+            {
+                //add the new files to cache
+                return caches.open(cacheName).then(function(cache)
+                {
+                    cache.put(e.request, response.clone());
+                    return response;
+                });
+            });
         })
     );
 });
